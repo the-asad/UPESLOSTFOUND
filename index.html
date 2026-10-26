@@ -597,8 +597,15 @@
 // ════════════════════════════════════════════════
 // API — All data goes through backend (shared DB)
 // Both you and your friend use the same database
-// ════════════════════════════════════════════════
-const API_BASE = 'http://localhost:5000';
+// Dynamic API Base:
+// 1. If served over HTTP/HTTPS, use same origin (e.g. localhost:5001 or live hosted URL)
+// 2. If opened via file:// protocol, fallback to http://localhost:5001
+// 3. Allows optional override via localStorage.getItem('API_BASE') for split deployments
+const API_BASE = localStorage.getItem('API_BASE') || (
+  window.location.protocol.startsWith('http')
+    ? window.location.origin
+    : 'http://localhost:5001'
+);
 let authToken   = null;
 let currentUser = null;
 let allItems    = [];   // cached from server

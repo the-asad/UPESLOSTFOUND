@@ -17,7 +17,7 @@ No internet needed after that.
 ============================================================
 """
 
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, g, send_from_directory
 from flask_cors import CORS
 import sqlite3, os, base64, hashlib, hmac, json, time, re, smtplib
 from datetime import datetime, timedelta
@@ -81,19 +81,17 @@ except Exception as e:
     print(f"[NER] SpaCy not available: {e}. pip install spacy && python -m spacy download en_core_web_sm")
 
 # ── Gmail credentials (Module 2) ─────────────────────────
-GMAIL_USER     = "tilaky222@gmail.com"
-GMAIL_PASSWORD = "uiznqkjnhmlonvop"
-
-
+GMAIL_USER     = os.environ.get("GMAIL_USER", "tilaky222@gmail.com")
+GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD", "uiznqkjnhmlonvop")
 
 # ─────────────────────────────────────────────────────────
 
 app = Flask(__name__)
 CORS(app)
 
-SECRET_KEY    = "upes_lostfound_secret_2025"
-DB_PATH       = "lostfound.db"
-UPLOAD_FOLDER = "static/uploads"
+SECRET_KEY    = os.environ.get("SECRET_KEY", "upes_lostfound_secret_2025")
+DB_PATH       = os.environ.get("DB_PATH", "lostfound.db")
+UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "static/uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
@@ -571,6 +569,15 @@ def auth_required(f):
     return wrapper
 
 def hash_pw(pw): return hashlib.sha256(pw.encode()).hexdigest()
+
+
+# ════════════════════════════════════════════════════════
+# FRONTEND ROUTE
+# ════════════════════════════════════════════════════════
+
+@app.route("/", methods=["GET"])
+def serve_index():
+    return send_from_directory(".", "index.html")
 
 
 # ════════════════════════════════════════════════════════
@@ -1836,7 +1843,7 @@ if __name__ == "__main__":
     print(f"  OCR       : {'Ready ✅' if OCR_READY else 'pip install easyocr'}")
     print(f"  NER       : {'Ready ✅' if SPACY_READY else 'pip install spacy && python -m spacy download en_core_web_sm'}")
     print(f"  Gmail     : {'Configured ✅' if GMAIL_USER else 'Not set (in-app notifications only)'}")
-    print(f"  DB        : {DB_PATH}")
-    print(f"  Server    : http://localhost:5000")
+    port = int(os.environ.get("PORT", 5001))
+    print(f"  Server    : http://localhost:{port}")
     print(f"{'='*50}\n")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=port, host='0.0.0.0')
