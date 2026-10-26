@@ -1,0 +1,23 @@
+# Web framework
+flask==3.0.0
+flask-cors==4.0.0
+
+# Image processing
+pillow==10.2.0
+
+# Auth
+python-jose==3.3.0
+
+# CLIP AI model (replaces YOLOv8)
+# torch and torchvision: deep learning framework
+# transformers: HuggingFace library that provides CLIP
+torch==2.2.2
+torchvision==0.17.2
+transformers==4.40.0
+
+# ML model (ml_model.py + notebook)
+scikit-learn==1.4.1
+pandas==2.2.1
+numpy==1.26.4
+matplotlib==3.8.3
+seaborn==0.13.2

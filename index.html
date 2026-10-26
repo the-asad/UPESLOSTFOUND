@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UPES Student Portal — Lost & Found</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --grad: linear-gradient(180deg,#00bcd4 0%,#5c35a0 55%,#3d1f8c 100%);
+      --mid: #5c35a0; --top: #00bcd4; --dark: #3d1f8c;
+      --bg: #f0f2f5; --card: #fff; --border: #e0e0e0;
+      --text: #333; --muted: #777;
+      --green: #2e7d32; --green-bg: #e8f5e9;
+      --red: #c62828; --red-bg: #ffebee;
+      --orange: #e65100; --orange-bg: #fff3e0;
+      --blue-bg: #e3f2fd;
+      --sw: 220px; --th: 52px;
+    }
+    body { font-family:'Roboto',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* LOGIN PAGE */
+    .login-page { display:flex; min-height:100vh; }
+    .login-left {
+      width:420px; background:var(--grad); display:flex; flex-direction:column;
+      align-items:center; justify-content:center; padding:3rem 2.5rem; color:white; flex-shrink:0;
+    }
+    .login-logo-circle { width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:800; margin-bottom:1.2rem; border:2px solid rgba(255,255,255,.4); }
+    .login-brand { font-size:1.6rem; font-weight:700; margin-bottom:.3rem; }
+    .login-sub { font-size:.85rem; opacity:.8; text-align:center; line-height:1.6; }
+    .login-features { margin-top:2.5rem; display:flex; flex-direction:column; gap:.9rem; }
+    .login-feat { display:flex; align-items:center; gap:.75rem; font-size:.82rem; opacity:.9; }
+    .login-feat-icon { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .login-right { flex:1; display:flex; align-items:center; justify-content:center; padding:2rem; background:#f7f8fc; }
+    .login-form-box { background:white; border-radius:12px; padding:2.5rem; width:100%; max-width:400px; box-shadow:0 4px 24px rgba(0,0,0,.1); }
+    .login-form-title { font-size:1.3rem; font-weight:700; color:var(--mid); margin-bottom:.3rem; }
+    .login-form-sub { font-size:.82rem; color:var(--muted); margin-bottom:1.8rem; }
+    .form-group { margin-bottom:1rem; }
+    label.fl { display:block; font-size:.75rem; font-weight:500; color:#555; margin-bottom:.3rem; text-transform:uppercase; letter-spacing:.04em; }
+    input[type=text],input[type=email],input[type=password],input[type=date],input[type=tel],textarea,select {
+      width:100%; padding:.55rem .8rem; border:1px solid #ccc; border-radius:6px;
+      font-size:.85rem; font-family:'Roboto',sans-serif; color:var(--text); background:white; outline:none; transition:border-color .2s, box-shadow .2s;
+    }
+    input:focus,textarea:focus,select:focus { border-color:var(--mid); box-shadow:0 0 0 3px rgba(92,53,160,.1); }
+    textarea { resize:vertical; min-height:72px; }
+    .btn { padding:.55rem 1.2rem; border-radius:6px; font-size:.84rem; font-weight:500; cursor:pointer; border:none; font-family:'Roboto',sans-serif; transition:all .2s; }
+    .btn-primary { background:var(--grad); color:white; }
+    .btn-primary:hover { opacity:.9; box-shadow:0 3px 12px rgba(92,53,160,.3); }
+    .btn-outline { background:white; border:1px solid var(--mid); color:var(--mid); }
+    .btn-outline:hover { background:var(--blue-bg); }
+    .btn-green { background:linear-gradient(90deg,#2e7d32,#43a047); color:white; }
+    .btn-green:hover { opacity:.9; }
+    .btn-red { background:linear-gradient(90deg,#c62828,#e53935); color:white; }
+    .btn-sm { padding:.35rem .8rem; font-size:.76rem; }
+    .login-error { background:var(--red-bg); color:var(--red); border-radius:6px; padding:.55rem .8rem; font-size:.8rem; margin-bottom:1rem; display:none; }
+    .login-success { background:var(--green-bg); color:var(--green); border-radius:6px; padding:.55rem .8rem; font-size:.8rem; margin-bottom:1rem; display:none; }
+    .forgot-link { font-size:.78rem; color:var(--mid); cursor:pointer; text-decoration:underline; float:right; margin-top:.2rem; }
+    .forgot-link:hover { opacity:.75; }
+    .demo-hint { margin-top:1.2rem; background:var(--blue-bg); border-radius:8px; padding:.75rem 1rem; font-size:.78rem; color:#1565c0; }
+
+    /* PORTAL LAYOUT */
+    .portal { display:none; }
+    .topbar {
+      height:var(--th); background:white; position:fixed; top:0; left:0; right:0; z-index:200;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 1.5rem; border-bottom:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    .topbar-left { display:flex; align-items:center; gap:.75rem; }
+    .upes-logo-circle { width:30px; height:30px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:800; color:white; }
+    .topbar-brand { font-size:.92rem; font-weight:700; color:#333; }
+    .topbar-brand span { color:var(--mid); }
+    .portal-label { font-size:.78rem; color:var(--muted); border-left:1px solid var(--border); padding-left:.75rem; margin-left:.25rem; }
+    .topbar-right { display:flex; align-items:center; gap:1rem; }
+    .topbar-icon { width:32px; height:32px; border-radius:50%; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.9rem; position:relative; transition:background .2s; }
+    .topbar-icon:hover { background:var(--blue-bg); }
+    .notif-dot { position:absolute; top:3px; right:3px; width:8px; height:8px; background:#e53935; border-radius:50%; border:1.5px solid white; }
+    .notif-count { position:absolute; top:-3px; right:-4px; min-width:16px; height:16px; background:#e53935; border-radius:10px; font-size:.6rem; font-weight:700; color:white; display:flex; align-items:center; justify-content:center; padding:0 3px; border:1.5px solid white; }
+
+    .sidebar {
+      width:var(--sw); background:var(--grad); position:fixed; top:var(--th); left:0; bottom:0;
+      overflow-y:auto; z-index:100; scrollbar-width:none;
+    }
+    .sidebar::-webkit-scrollbar { display:none; }
+    .nav-item {
+      display:flex; align-items:center; gap:.85rem; padding:.7rem 1.2rem;
+      color:rgba(255,255,255,.82); cursor:pointer; font-size:.82rem;
+      border-left:3px solid transparent; transition:background .15s; user-select:none;
+    }
+    .nav-item:hover { background:rgba(255,255,255,.1); color:white; }
+    .nav-item.active { background:rgba(255,255,255,.2); color:white; font-weight:500; border-left:3px solid rgba(255,255,255,.85); }
+    .nav-icon { font-size:.95rem; width:18px; text-align:center; flex-shrink:0; }
+    .nav-badge { margin-left:auto; background:#e53935; color:white; font-size:.62rem; font-weight:700; padding:.1rem .4rem; border-radius:10px; }
+
+    .main { margin-left:var(--sw); margin-top:var(--th); padding:1.2rem; min-height:calc(100vh - var(--th)); }
+
+    /* CARDS */
+    .card { background:white; border:1px solid var(--border); border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .card-header { padding:.8rem 1.1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .card-title { font-size:.88rem; font-weight:600; }
+    .card-body { padding:1.1rem; }
+
+    /* PROFILE STRIP */
+    .profile-strip { background:white; border:1px solid var(--border); border-radius:8px; padding:.9rem 1.2rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:1.2rem; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .p-avatar { width:50px; height:50px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:700; color:white; flex-shrink:0; border:2px solid var(--border); }
+    .p-name { font-size:.95rem; font-weight:600; color:var(--mid); }
+    .p-meta { font-size:.77rem; color:var(--muted); margin-top:.15rem; }
+    .status-badge { background:var(--green-bg); color:var(--green); font-size:.7rem; font-weight:600; padding:.18rem .5rem; border-radius:4px; }
+    .p-stats { display:flex; gap:1.5rem; margin-left:auto; }
+    .pstat { text-align:center; }
+    .pstat-n { font-size:1.1rem; font-weight:700; }
+    .pstat-l { font-size:.67rem; color:var(--muted); }
+
+    /* STATS ROW */
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.2rem; }
+    .stat-card { background:white; border:1px solid var(--border); border-radius:8px; padding:.9rem 1rem; display:flex; align-items:center; gap:.85rem; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .stat-icon { width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+    .stat-num { font-size:1.35rem; font-weight:700; line-height:1; }
+    .stat-lbl { font-size:.7rem; color:var(--muted); margin-top:.2rem; }
+
+    /* TABS */
+    .tabs { display:flex; background:white; border-radius:8px; border:1px solid var(--border); overflow:hidden; margin-bottom:1.2rem; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .tab-btn { flex:1; padding:.62rem .4rem; font-size:.8rem; font-weight:500; border:none; background:transparent; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; transition:all .2s; font-family:'Roboto',sans-serif; }
+    .tab-btn:hover { background:var(--bg); }
+    .tab-btn.active { color:var(--mid); border-bottom:2px solid var(--mid); background:var(--blue-bg); font-weight:600; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* ITEMS GRID */
+    .filter-bar { display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem; }
+    .chip { padding:.32rem .85rem; border-radius:20px; font-size:.77rem; cursor:pointer; border:1px solid var(--border); background:white; color:var(--muted); transition:all .2s; font-family:'Roboto',sans-serif; }
+    .chip:hover { border-color:var(--mid); color:var(--mid); }
+    .chip.active { background:var(--mid); border-color:var(--mid); color:white; }
+    .search-wrap { flex:1; max-width:250px; position:relative; }
+    .search-wrap input { padding-left:2rem; }
+    .s-icon { position:absolute; left:.6rem; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
+    .items-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:.9rem; }
+    .item-card { background:white; border:1px solid var(--border); border-radius:8px; overflow:hidden; cursor:pointer; transition:all .2s; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+    .item-card:hover { transform:translateY(-2px); box-shadow:0 4px 14px rgba(0,0,0,.1); border-color:#c5b3e6; }
+    .item-thumb { height:120px; background:var(--bg); display:flex; align-items:center; justify-content:center; position:relative; border-bottom:1px solid var(--border); overflow:hidden; }
+    .item-thumb img { width:100%; height:100%; object-fit:cover; }
+    .item-thumb-emoji { font-size:2.8rem; }
+    .ibadge { position:absolute; top:.4rem; right:.4rem; font-size:.62rem; font-weight:600; padding:.17rem .45rem; border-radius:4px; text-transform:uppercase; }
+    .b-lost { background:var(--red-bg); color:var(--red); }
+    .b-found { background:var(--green-bg); color:var(--green); }
+    .b-claimed { background:var(--orange-bg); color:var(--orange); }
+    .ic-body { padding:.65rem .8rem; }
+    .ic-name { font-size:.84rem; font-weight:600; margin-bottom:.18rem; }
+    .ic-loc { font-size:.72rem; color:var(--muted); margin-bottom:.4rem; }
+    .ic-tags { display:flex; gap:.3rem; flex-wrap:wrap; }
+    .itag { font-size:.64rem; background:var(--bg); border:1px solid var(--border); border-radius:3px; padding:.1rem .38rem; color:var(--muted); }
+    .ic-footer { display:flex; align-items:center; justify-content:space-between; padding:.48rem .8rem; border-top:1px solid var(--border); font-size:.7rem; color:var(--muted); }
+
+    /* FORM */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
+    .full { grid-column:1/-1; }
+    .form-sec { font-size:.8rem; font-weight:600; color:var(--mid); margin:1rem 0 .65rem; padding-bottom:.35rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:.4rem; }
+    .readonly-field { background:#f5f5f5 !important; color:#888 !important; cursor:not-allowed; }
+
+    /* UPLOAD */
+    .upload-zone { border:2px dashed #bbb; border-radius:8px; padding:1.2rem; text-align:center; cursor:pointer; transition:all .2s; background:var(--bg); }
+    .upload-zone:hover { border-color:var(--mid); background:var(--blue-bg); }
+    .upload-zone.has-img { padding:.6rem; border-style:solid; border-color:var(--mid); }
+    .uz-icon { font-size:1.8rem; margin-bottom:.3rem; }
+    .uz-text { font-size:.8rem; color:#555; font-weight:500; }
+    .uz-sub { font-size:.72rem; color:var(--muted); margin-top:.2rem; }
+    .preview-img { display:none; max-height:140px; border-radius:6px; object-fit:contain; margin:0 auto; }
+
+    /* AI PANEL */
+    .ai-panel { display:none; margin-top:.7rem; border:1px solid #c5b3e6; border-radius:8px; overflow:hidden; background:#faf7ff; }
+    .ai-ph { display:flex; align-items:center; justify-content:space-between; padding:.52rem .9rem; background:linear-gradient(90deg,var(--mid),var(--top)); }
+    .ai-ph-title { font-size:.78rem; font-weight:600; color:white; }
+    .ai-conf { font-size:.7rem; background:rgba(255,255,255,.25); color:white; padding:.13rem .45rem; border-radius:10px; font-weight:600; }
+    .ai-body { padding:.85rem; }
+    .ai-loading { display:flex; align-items:center; gap:.65rem; font-size:.8rem; color:var(--mid); }
+    .spinner { width:15px; height:15px; border:2px solid #c5b3e6; border-top-color:var(--mid); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .ai-grid { display:grid; grid-template-columns:1fr 1fr; gap:.45rem; margin-bottom:.7rem; }
+    .ai-chip { background:white; border:1px solid #ddd; border-radius:6px; padding:.42rem .6rem; }
+    .ai-cl { font-size:.63rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:.12rem; }
+    .ai-cv { font-size:.82rem; font-weight:600; }
+    .ai-dl { font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:.28rem; }
+    .ai-db { background:white; border:1px solid #ddd; border-radius:6px; padding:.5rem .7rem; font-size:.8rem; color:#444; line-height:1.55; }
+    .ai-acts { display:flex; gap:.55rem; margin-top:.65rem; }
+    .ai-err { background:var(--red-bg); color:var(--red); border-radius:6px; padding:.55rem .75rem; font-size:.78rem; }
+
+    /* NOTIFICATIONS PANEL */
+    .notif-panel { position:fixed; top:var(--th); right:0; width:340px; height:calc(100vh - var(--th)); background:white; border-left:1px solid var(--border); z-index:150; transform:translateX(100%); transition:transform .3s; box-shadow:-4px 0 20px rgba(0,0,0,.1); display:flex; flex-direction:column; }
+    .notif-panel.open { transform:translateX(0); }
+    .notif-panel-header { padding:.9rem 1.1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--grad); color:white; }
+    .notif-panel-title { font-size:.9rem; font-weight:600; }
+    .notif-close { background:none; border:none; color:rgba(255,255,255,.8); font-size:1.1rem; cursor:pointer; }
+    .notif-list { flex:1; overflow-y:auto; padding:.75rem; display:flex; flex-direction:column; gap:.6rem; }
+    .notif-item { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.75rem; border-left:3px solid var(--mid); }
+    .notif-item.unread { background:#f3f0ff; border-left-color:var(--mid); }
+    .notif-item.match { border-left-color:var(--green); }
+    .notif-item.hint { border-left-color:var(--orange); }
+    .notif-icon { font-size:1.1rem; margin-bottom:.3rem; }
+    .notif-title { font-size:.82rem; font-weight:600; margin-bottom:.2rem; }
+    .notif-body { font-size:.76rem; color:var(--muted); line-height:1.5; }
+    .notif-time { font-size:.68rem; color:var(--muted); margin-top:.35rem; }
+    .mark-all-btn { padding:.6rem 1rem; border-top:1px solid var(--border); text-align:center; }
+
+    /* DASHBOARD TABLE */
+    table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    th { background:var(--bg); padding:.58rem .85rem; text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); border-bottom:1px solid var(--border); font-weight:600; }
+    td { padding:.62rem .85rem; border-bottom:1px solid var(--border); color:#444; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#fafafa; }
+    .mini-br { display:flex; align-items:center; gap:.55rem; margin-bottom:.45rem; font-size:.76rem; }
+    .mini-bl { width:90px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mini-bt { flex:1; height:5px; background:#eee; border-radius:3px; overflow:hidden; }
+    .mini-bf { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--mid),var(--top)); }
+    .mini-bp { font-size:.7rem; color:var(--mid); font-weight:600; width:28px; text-align:right; }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:1.5rem; right:1.5rem; background:#333; color:white; padding:.7rem 1.1rem; border-radius:8px; font-size:.82rem; z-index:9999; transform:translateY(80px); opacity:0; transition:all .35s; display:flex; align-items:center; gap:.55rem; box-shadow:0 4px 20px rgba(0,0,0,.2); max-width:320px; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.success { background:#2e7d32; }
+    .toast.info { background:var(--mid); }
+    .toast.warning { background:#e65100; }
+
+    /* MY REPORTS */
+    .mr-row { display:flex; align-items:center; gap:1rem; padding:.75rem 0; border-bottom:1px solid var(--border); }
+    .mr-row:last-child { border-bottom:none; }
+    .mr-icon { width:36px; height:36px; border-radius:7px; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; border:1px solid var(--border); overflow:hidden; }
+    .mr-icon img { width:100%; height:100%; object-fit:cover; }
+    .mr-info { flex:1; }
+    .mr-name { font-size:.83rem; font-weight:500; }
+    .mr-meta { font-size:.72rem; color:var(--muted); margin-top:.1rem; }
+    .mr-status { font-size:.7rem; font-weight:600; padding:.18rem .5rem; border-radius:4px; }
+
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; }
+    .page-title { font-size:1rem; font-weight:600; }
+    .breadcrumb { font-size:.76rem; color:var(--muted); margin-top:.12rem; }
+    .breadcrumb span { color:var(--mid); }
+
+    @media(max-width:768px){
+      .sidebar{display:none;} .main{margin-left:0;}
+      .stats-row{grid-template-columns:1fr 1fr;}
+      .form-grid{grid-template-columns:1fr;}
+      .login-left{display:none;} .login-page{justify-content:center;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     LOGIN PAGE
+════════════════════════════════════════════ -->
+<div class="login-page" id="login-page">
+  <div class="login-left">
+    <div class="login-logo-circle">U</div>
+    <div class="login-brand">UPES</div>
+    <div style="font-size:.95rem;font-weight:500;margin-bottom:.4rem">Student Portal</div>
+    <div class="login-sub">University of Petroleum &amp; Energy Studies<br/>Lost &amp; Found Management System</div>
+    <div class="login-features">
+      <div class="login-feat"><div class="login-feat-icon">🔍</div><span>AI-powered item matching</span></div>
+      <div class="login-feat"><div class="login-feat-icon">🔔</div><span>Real-time notifications</span></div>
+      <div class="login-feat"><div class="login-feat-icon">📷</div><span>Image-based detection</span></div>
+      <div class="login-feat"><div class="login-feat-icon">🗄️</div><span>Campus-wide database</span></div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form-box">
+      <div class="login-form-title">Welcome Back</div>
+      <div class="login-form-sub">Sign in with your UPES credentials</div>
+      <div class="login-error" id="login-error">⚠️ Invalid Student ID or password. Please try again.</div>
+      <div class="form-group">
+        <label class="fl">Student ID / SAP ID</label>
+        <input type="text" id="login-id" placeholder="e.g. 500119640" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div class="form-group">
+        <label class="fl">Password</label>
+        <input type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div style="text-align:right;margin-top:-.4rem;margin-bottom:.6rem">
+        <span class="forgot-link" onclick="toggleForgot()">Forgot password?</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:.65rem;margin-top:.3rem" onclick="doLogin()">Sign In →</button>
+      <div style="text-align:center;margin-top:.9rem;font-size:.8rem;color:var(--muted)">
+        New student? <span style="color:var(--mid);cursor:pointer;font-weight:500" onclick="toggleRegister()">Register here</span>
+      </div>
+
+      <!-- FORGOT PASSWORD PANEL -->
+      <div id="forgot-box" style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem">
+        <div style="font-size:.85rem;font-weight:600;color:var(--mid);margin-bottom:.4rem">🔑 Reset Password</div>
+        <div style="font-size:.76rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5">
+          Enter your SAP ID. We will send a reset link to your UPES college email
+          (<code>FirstName.last6digits@stu.upes.ac.in</code>).
+        </div>
+        <div class="login-success" id="forgot-success"></div>
+        <div class="form-group">
+          <label class="fl">SAP ID</label>
+          <input type="text" id="forgot-sap" placeholder="e.g. 500119640" maxlength="9"/>
+        </div>
+        <div class="form-group" id="forgot-newpw-group" style="display:none">
+          <label class="fl">New Password</label>
+          <input type="password" id="forgot-newpw" placeholder="Enter new password"/>
+        </div>
+        <div class="form-group" id="forgot-token-group" style="display:none">
+          <label class="fl">Reset Code (from email)</label>
+          <input type="text" id="forgot-token" placeholder="6-digit code"/>
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-outline btn-sm" style="flex:1" id="forgot-send-btn" onclick="doForgotSend()">Send Reset Code</button>
+          <button class="btn btn-green btn-sm" style="flex:1;display:none" id="forgot-confirm-btn" onclick="doForgotConfirm()">Reset Password</button>
+        </div>
+      </div>
+
+      <!-- REGISTER FORM (hidden by default) -->
+      <div id="register-box" style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem">
+        <div style="font-size:.85rem;font-weight:600;color:var(--mid);margin-bottom:.7rem">Create Account</div>
+        <div class="form-group"><label class="fl">Full Name</label><input type="text" id="reg-name" placeholder="e.g. Rahul Sharma"/></div>
+        <div class="form-group"><label class="fl">Student ID</label><input type="text" id="reg-id" placeholder="e.g. 500119641"/></div>
+        <div class="form-group"><label class="fl">Email</label><input type="email" id="reg-email" placeholder="name@upes.ac.in"/></div>
+        <div class="form-group"><label class="fl">Password</label><input type="password" id="reg-pw" placeholder="Create a password"/></div>
+        <button class="btn btn-green" style="width:100%;padding:.6rem" onclick="doRegister()">Register →</button>
+      </div>
+
+      <div class="demo-hint">
+        <b>Demo Credentials:</b><br/>
+        Student ID: <code>500119640</code> &nbsp; Password: <code>upes@2025</code><br/>
+        Admin ID: <code>admin</code> &nbsp; Password: <code>admin123</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PORTAL
+════════════════════════════════════════════ -->
+<div class="portal" id="portal">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="upes-logo-circle">U</div>
+      <div class="topbar-brand"><span>UPES</span></div>
+      <div class="portal-label">Student Portal</div>
+    </div>
+    <div class="topbar-right">
+      <div style="font-size:.8rem;color:var(--muted)">Welcome, <b id="topbar-name">Tilak</b></div>
+      <div class="topbar-icon" onclick="toggleNotifPanel()" title="Notifications">
+        🔔<span class="notif-count" id="notif-count">3</span>
+      </div>
+      <div class="topbar-icon" title="Logout" onclick="doLogout()">⏻</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div style="padding:.5rem 0">
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">📅</span> Holiday and Events</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">👤</span> Student Profile</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">🔧</span> Service Request</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">📆</span> Time Table</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">🚩</span> Received Circulars</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">✅</span> Course Selection</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">🎫</span> Hall Ticket</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">📄</span> Transcript</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">💡</span> My Feedback</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">ℹ️</span> LMS</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">🏠</span> Hostel Management</div>
+      <div class="nav-item" onclick="sideNav(this)"><span class="nav-icon">📊</span> Student Attendance</div>
+      <div class="nav-item active" onclick="sideNav(this,true)"><span class="nav-icon">🔍</span> Lost &amp; Found <span class="nav-badge">New</span></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS PANEL -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-header">
+      <div class="notif-panel-title">🔔 Notifications</div>
+      <button class="notif-close" onclick="toggleNotifPanel()">✕</button>
+    </div>
+    <div class="notif-list" id="notif-list"></div>
+    <div class="mark-all-btn">
+      <button class="btn btn-outline btn-sm" onclick="markAllRead()">Mark all as read</button>
+      <button class="btn btn-sm" style="background:#fff0f0;border:1px solid #ffcdd2;color:#c62828;margin-left:.5rem" onclick="clearAllNotifs()">🗑 Clear All</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Lost &amp; Found — AI Powered</div>
+        <div class="breadcrumb">Student Portal › <span>Lost &amp; Found</span></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="showTab('report')">+ Report Item</button>
+    </div>
+
+    <!-- PROFILE STRIP -->
+    <div class="profile-strip">
+      <div class="p-avatar" id="p-avatar">TY</div>
+      <div>
+        <div class="p-name" id="p-name">Tilak Yadav</div>
+        <div class="p-meta">ID: <b id="p-id">500119640</b> &nbsp;|&nbsp; <span id="p-prog">B.Tech (Hons.) CSE</span> &nbsp;|&nbsp; <span id="p-sem">Semester 6</span> &nbsp;&nbsp;<span class="status-badge">● ACTIVE</span></div>
+      </div>
+      <div class="p-stats">
+        <div class="pstat"><div class="pstat-n" style="color:var(--red)" id="ps-lost">2</div><div class="pstat-l">Lost Reports</div></div>
+        <div class="pstat"><div class="pstat-n" style="color:var(--green)" id="ps-found">1</div><div class="pstat-l">Found Reports</div></div>
+        <div class="pstat"><div class="pstat-n" style="color:var(--mid)" id="ps-rec">1</div><div class="pstat-l">Recovered</div></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon" style="background:var(--red-bg)">🔴</div><div><div class="stat-num" style="color:var(--red)" id="s-lost">47</div><div class="stat-lbl">Active Lost Reports</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--green-bg)">🟢</div><div><div class="stat-num" style="color:var(--green)" id="s-found">29</div><div class="stat-lbl">Found Items in Custody</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--blue-bg)">🏆</div><div><div class="stat-num" style="color:var(--mid)">312</div><div class="stat-lbl">Total Recoveries</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#f3e5f5">🤖</div><div><div class="stat-num" style="color:#6a1b9a">AI</div><div class="stat-lbl">Vision Matching Active</div></div></div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+      <button class="tab-btn" onclick="showTab('browse')">🗂 Browse Items</button>
+      <button class="tab-btn" onclick="showTab('report')">📝 Report Item</button>
+      <button class="tab-btn" onclick="showTab('myreports')">📋 My Reports</button>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <div class="tab-panel active" id="tab-dashboard">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent Campus Activity</div><button class="btn btn-outline btn-sm" onclick="showTab('browse')">View All</button></div>
+          <div class="card-body" style="padding:0;overflow-x:auto">
+            <table>
+              <thead><tr><th>Item</th><th>Type</th><th>Location</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="dash-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div class="card">
+            <div class="card-header"><div class="card-title">By Category</div></div>
+            <div class="card-body">
+              <div class="mini-br"><span class="mini-bl">Electronics</span><div class="mini-bt"><div class="mini-bf" style="width:85%"></div></div><span class="mini-bp">34%</span></div>
+              <div class="mini-br"><span class="mini-bl">Bags</span><div class="mini-bt"><div class="mini-bf" style="width:65%"></div></div><span class="mini-bp">26%</span></div>
+              <div class="mini-br"><span class="mini-bl">Keys & Cards</span><div class="mini-bt"><div class="mini-bf" style="width:45%"></div></div><span class="mini-bp">18%</span></div>
+              <div class="mini-br"><span class="mini-bl">Clothing</span><div class="mini-bt"><div class="mini-bf" style="width:30%"></div></div><span class="mini-bp">12%</span></div>
+              <div class="mini-br"><span class="mini-bl">Other</span><div class="mini-bt"><div class="mini-bf" style="width:25%"></div></div><span class="mini-bp">10%</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Top Loss Locations</div></div>
+            <div class="card-body">
+              <div class="mini-br"><span class="mini-bl">Library</span><div class="mini-bt"><div class="mini-bf" style="width:90%"></div></div><span class="mini-bp">32%</span></div>
+              <div class="mini-br"><span class="mini-bl">Canteen</span><div class="mini-bt"><div class="mini-bf" style="width:70%"></div></div><span class="mini-bp">25%</span></div>
+              <div class="mini-br"><span class="mini-bl">Lecture Blocks</span><div class="mini-bt"><div class="mini-bf" style="width:50%"></div></div><span class="mini-bp">20%</span></div>
+              <div class="mini-br"><span class="mini-bl">Parking Lot</span><div class="mini-bt"><div class="mini-bf" style="width:35%"></div></div><span class="mini-bp">14%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BROWSE ── -->
+    <div class="tab-panel" id="tab-browse">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Campus Items Database</div><span style="font-size:.74rem;color:var(--muted)" id="item-count"></span></div>
+        <div class="card-body">
+          <div class="filter-bar">
+            <button class="chip active" onclick="filterItems('all',this)">All</button>
+            <button class="chip" onclick="filterItems('lost',this)">Lost</button>
+            <button class="chip" onclick="filterItems('found',this)">Found</button>
+            <button class="chip" onclick="filterItems('claimed',this)">Claimed</button>
+            <div class="search-wrap"><span class="s-icon">🔍</span><input type="text" placeholder="Search…" oninput="searchItems(this.value)"/></div>
+          </div>
+          <div class="items-grid" id="items-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REPORT ── -->
+    <div class="tab-panel" id="tab-report">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+        <!-- LOST -->
+        <div class="card">
+          <div class="card-header" style="background:linear-gradient(90deg,#ffebee,white)">
+            <div class="card-title" style="color:var(--red)">🔍 I Lost Something</div>
+          </div>
+          <div class="card-body">
+            <div class="form-sec">🎓 Student Info (auto-filled)</div>
+            <div class="form-grid" style="margin-bottom:.8rem">
+              <div class="form-group"><label class="fl">Name</label><input class="readonly-field" readonly id="lf-name"/></div>
+              <div class="form-group"><label class="fl">Student ID</label><input class="readonly-field" readonly id="lf-id"/></div>
+              <div class="form-group"><label class="fl">Programme</label><input class="readonly-field" readonly id="lf-prog"/></div>
+              <div class="form-group"><label class="fl">Semester</label><input class="readonly-field" readonly id="lf-sem"/></div>
+            </div>
+            <div class="form-sec">📷 Upload Photo of Lost Item</div>
+            <div class="upload-zone" id="lost-upload-zone" onclick="triggerUpload('lost')" ondragover="handleDragOver(event,'lost')" ondrop="handleDrop(event,'lost')">
+              <div id="lost-upload-placeholder">
+                <div class="uz-icon">📷</div>
+                <div class="uz-text">Upload photo of lost item</div>
+                <div class="uz-sub">Helps AI match with found items visually</div>
+              </div>
+              <img class="preview-img" id="lost-preview"/>
+            </div>
+            <input type="file" id="lost-file" accept="image/*" style="display:none" onchange="handleFile(this,'lost')"/>
+            <div class="form-sec" style="margin-top:.9rem">📦 Item Details</div>
+            <div class="form-grid">
+              <div class="form-group"><label class="fl">Item Name *</label><input type="text" id="l-name" placeholder="e.g. Black Nike Backpack"/></div>
+              <div class="form-group"><label class="fl">Category *</label>
+                <select id="l-cat">
+                  <option value="">Select</option>
+                  <option>Electronics</option><option>Bags & Accessories</option>
+                  <option>Keys & Cards</option><option>Clothing</option>
+                  <option>Books & Stationery</option><option>Jewellery</option><option>Other</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="fl">Date Lost *</label><input type="date" id="l-date"/></div>
+              <div class="form-group"><label class="fl">Last Seen Location *</label><input type="text" id="l-loc" placeholder="e.g. Library 2nd floor, near window"/></div>
+              <div class="form-group full"><label class="fl">Description</label><textarea id="l-desc" placeholder="Colour, brand, size, any unique markings, what was inside…"></textarea></div>
+              <div class="form-group"><label class="fl">Contact Email</label><input type="email" id="l-email"/></div>
+              <div class="form-group"><label class="fl">Mobile No.</label><input type="tel" id="l-phone" placeholder="10-digit number"/></div>
+            </div>
+            <button class="btn btn-red" style="width:100%;margin-top:.6rem;padding:.6rem" onclick="submitLost()">Submit Lost Report →</button>
+          </div>
+        </div>
+
+        <!-- FOUND -->
+        <div class="card">
+          <div class="card-header" style="background:linear-gradient(90deg,#e8f5e9,white)">
+            <div class="card-title" style="color:var(--green)">📦 I Found Something</div>
+          </div>
+          <div class="card-body">
+            <div class="form-sec">🎓 Student Info (auto-filled)</div>
+            <div class="form-grid" style="margin-bottom:.8rem">
+              <div class="form-group"><label class="fl">Name</label><input class="readonly-field" readonly id="ff-name"/></div>
+              <div class="form-group"><label class="fl">Student ID</label><input class="readonly-field" readonly id="ff-id"/></div>
+            </div>
+            <div class="form-sec">🤖 AI Object Detection — Upload Photo</div>
+            <div class="upload-zone" id="found-upload-zone" onclick="triggerUpload('found')" ondragover="handleDragOver(event,'found')" ondrop="handleDrop(event,'found')">
+              <div id="found-upload-placeholder">
+                <div class="uz-icon">🤖</div>
+                <div class="uz-text">Upload photo of found item</div>
+                <div class="uz-sub">AI auto-detects name, category &amp; description</div>
+              </div>
+              <img class="preview-img" id="found-preview"/>
+            </div>
+            <input type="file" id="found-file" accept="image/*" style="display:none" onchange="handleFile(this,'found')"/>
+            <div class="ai-panel" id="ai-panel">
+              <div class="ai-ph"><div class="ai-ph-title">🧠 AI Detection Result</div><span class="ai-conf" id="ai-conf"></span></div>
+              <div class="ai-body">
+                <div class="ai-loading" id="ai-loading"><div class="spinner"></div><span id="ai-msg">Analyzing image…</span></div>
+                <div id="ai-result" style="display:none">
+                  <div class="ai-grid" id="ai-grid"></div>
+                  <div class="ai-dl">AI-Generated Description</div>
+                  <div class="ai-db" id="ai-desc"></div>
+                  <div class="ai-acts">
+                    <button class="btn btn-primary btn-sm" onclick="applyAI()">✅ Apply to Form</button>
+                    <button class="btn btn-outline btn-sm" onclick="retryAI()">🔄 Retry</button>
+                  </div>
+                </div>
+                <div class="ai-err" id="ai-err" style="display:none"></div>
+              </div>
+            </div>
+            <div class="form-sec" style="margin-top:.9rem">📦 Item Details</div>
+            <div class="form-grid">
+              <div class="form-group"><label class="fl">Item Name *</label><input type="text" id="f-name" placeholder="e.g. Blue Samsung Phone"/></div>
+              <div class="form-group"><label class="fl">Category *</label>
+                <select id="f-cat">
+                  <option value="">Select</option>
+                  <option>Electronics</option><option>Bags & Accessories</option>
+                  <option>Keys & Cards</option><option>Clothing</option>
+                  <option>Books & Stationery</option><option>Jewellery</option><option>Other</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="fl">Date Found *</label><input type="date" id="f-date"/></div>
+              <div class="form-group"><label class="fl">Found At Location *</label><input type="text" id="f-loc" placeholder="e.g. Canteen near cashier counter"/></div>
+              <div class="form-group full"><label class="fl">Description</label><textarea id="f-desc" placeholder="Colour, brand, condition, unique markings…"></textarea></div>
+            </div>
+            <button class="btn btn-green" style="width:100%;margin-top:.6rem;padding:.6rem" onclick="submitFound()">Submit Found Item →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MY REPORTS ── -->
+    <div class="tab-panel" id="tab-myreports">
+      <div class="card">
+        <div class="card-header"><div class="card-title" id="myreports-title">My Reports</div></div>
+        <div class="card-body" id="myreports-body"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /portal -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="t-icon">✅</span><span id="t-msg"></span></div>
+
+<script>
+// ════════════════════════════════════════════════
+// API — All data goes through backend (shared DB)
+// Both you and your friend use the same database
+// ════════════════════════════════════════════════
+const API_BASE = 'http://localhost:5000';
+let authToken   = null;
+let currentUser = null;
+let allItems    = [];   // cached from server
+let notifPollTimer = null;
+
+async function api(method, path, body=null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type':'application/json', ...(authToken ? {'Authorization':'Bearer '+authToken} : {}) }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API_BASE + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════
+
+function toggleForgot() {
+  const box = document.getElementById('forgot-box');
+  const reg  = document.getElementById('register-box');
+  reg.style.display = 'none';
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('forgot-success').style.display = 'none';
+  document.getElementById('forgot-newpw-group').style.display = 'none';
+  document.getElementById('forgot-token-group').style.display = 'none';
+  document.getElementById('forgot-send-btn').style.display = 'inline-block';
+  document.getElementById('forgot-confirm-btn').style.display = 'none';
+}
+
+async function doForgotSend() {
+  const sap    = document.getElementById('forgot-sap').value.trim();
+  const errEl  = document.getElementById('login-error');
+  const okEl   = document.getElementById('forgot-success');
+  errEl.style.display = 'none';
+  okEl.style.display  = 'none';
+  if (!sap || sap.length !== 9 || !sap.startsWith('5')) {
+    errEl.style.display = 'block';
+    errEl.textContent   = '⚠️ Enter a valid 9-digit UPES SAP ID.';
+    return;
+  }
+  try {
+    const res = await api('POST', '/api/auth/forgot_password', { sap_id: sap });
+    okEl.style.display  = 'block';
+    okEl.textContent    = '✅ Reset code sent to ' + res.email + '. Check your inbox.';
+    document.getElementById('forgot-newpw-group').style.display = 'block';
+    document.getElementById('forgot-token-group').style.display = 'block';
+    document.getElementById('forgot-send-btn').style.display    = 'none';
+    document.getElementById('forgot-confirm-btn').style.display = 'inline-block';
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent   = '⚠️ ' + (e.message.includes('fetch') ? 'Backend not running.' : e.message);
+  }
+}
+
+async function doForgotConfirm() {
+  const sap    = document.getElementById('forgot-sap').value.trim();
+  const token  = document.getElementById('forgot-token').value.trim();
+  const newpw  = document.getElementById('forgot-newpw').value;
+  const errEl  = document.getElementById('login-error');
+  const okEl   = document.getElementById('forgot-success');
+  errEl.style.display = 'none';
+  if (!token || !newpw) {
+    errEl.style.display = 'block';
+    errEl.textContent   = '⚠️ Enter the reset code and your new password.';
+    return;
+  }
+  try {
+    await api('POST', '/api/auth/reset_password', { sap_id: sap, token, new_password: newpw });
+    okEl.style.display = 'block';
+    okEl.textContent   = '✅ Password reset! You can now log in with your new password.';
+    document.getElementById('forgot-newpw-group').style.display = 'none';
+    document.getElementById('forgot-token-group').style.display = 'none';
+    document.getElementById('forgot-confirm-btn').style.display = 'none';
+    // Pre-fill login SAP ID for convenience
+    document.getElementById('login-id').value = sap;
+    setTimeout(() => { document.getElementById('forgot-box').style.display = 'none'; }, 3000);
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent   = '⚠️ ' + (e.message.includes('fetch') ? 'Backend not running.' : e.message);
+  }
+}
+
+async function doLogin() {
+  const id    = document.getElementById('login-id').value.trim();
+  const pw    = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+  if (!id || !pw) { errEl.style.display='block'; errEl.textContent='⚠️ Please enter Student ID and password.'; return; }
+  try {
+    const res = await api('POST', '/api/auth/login', { student_id: id, password: pw });
+    authToken   = res.token;
+    currentUser = res.user;
+    // give initials from name
+    currentUser.initials = currentUser.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    errEl.style.display = 'none';
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('portal').style.display = 'block';
+    initPortal();
+    showToast('Welcome back, ' + currentUser.name.split(' ')[0] + '!', 'success');
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠️ ' + (e.message.includes('fetch') ? 'Backend not running. Start: python app.py' : e.message);
+  }
+}
+
+function doLogout() {
+  authToken = null; currentUser = null; allItems = [];
+  clearInterval(notifPollTimer);
+  document.getElementById('portal').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pw').value = '';
+}
+
+function toggleRegister() {
+  const box = document.getElementById('register-box');
+  box.style.display = box.style.display==='none' ? 'block' : 'none';
+}
+
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const id    = document.getElementById('reg-id').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw    = document.getElementById('reg-pw').value;
+  const errEl = document.getElementById('login-error');
+  if (!name || !id || !email || !pw) {
+    errEl.style.display='block'; errEl.textContent='⚠️ Fill all registration fields.'; return;
+  }
+  try {
+    const res = await api('POST', '/api/auth/register', {
+      student_id: id, password: pw, name, email,
+      programme: 'B.Tech CSE', semester: 'Semester 1'
+    });
+    authToken   = res.token;
+    currentUser = res.user;
+    currentUser.initials = currentUser.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    errEl.style.display = 'none';
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('portal').style.display = 'block';
+    initPortal();
+    showToast('Account created! Welcome, ' + currentUser.name.split(' ')[0] + '!', 'success');
+  } catch(e) {
+    errEl.style.display='block';
+    errEl.textContent = '⚠️ ' + (e.message.includes('fetch') ? 'Backend not running. Start: python app.py' : e.message);
+  }
+}
+
+// ════════════════════════════════════════════════
+// PORTAL INIT
+// ════════════════════════════════════════════════
+async function initPortal() {
+  const u = currentUser;
+  document.getElementById('topbar-name').textContent  = u.name.split(' ')[0];
+  document.getElementById('p-avatar').textContent     = u.initials;
+  document.getElementById('p-name').textContent       = u.name;
+  document.getElementById('p-id').textContent         = u.id;
+  document.getElementById('p-prog').textContent       = u.programme || '';
+  document.getElementById('p-sem').textContent        = u.semester  || '';
+  ['lf-name','ff-name'].forEach(id => document.getElementById(id).value = u.name);
+  ['lf-id',  'ff-id' ].forEach(id => document.getElementById(id).value = u.id);
+  document.getElementById('lf-prog').value  = u.programme || '';
+  document.getElementById('lf-sem').value   = u.semester  || '';
+  document.getElementById('l-email').value  = u.email     || '';
+  document.getElementById('l-phone').value  = u.phone     || '';
+  document.getElementById('l-date').valueAsDate = new Date();
+  document.getElementById('f-date').valueAsDate = new Date();
+
+  await loadAllItems();
+  await renderNotifs();
+  updateStats();
+  renderDashTable();
+  renderItems();
+  renderMyReports();
+
+  // Poll server every 15s for new notifications
+  clearInterval(notifPollTimer);
+  notifPollTimer = setInterval(async () => {
+    await loadAllItems();
+    await renderNotifs();
+    updateStats();
+    renderDashTable();
+  }, 15000);
+}
+
+// ════════════════════════════════════════════════
+// LOAD ITEMS FROM SERVER
+// ════════════════════════════════════════════════
+async function loadAllItems() {
+  try {
+    allItems = await api('GET', '/api/items');
+  } catch(e) {
+    console.warn('Could not load items:', e.message);
+  }
+}
+
+function updateStats() {
+  const lost   = allItems.filter(i=>i.type==='lost'  && i.status!=='claimed').length;
+  const found  = allItems.filter(i=>i.type==='found' && i.status!=='claimed').length;
+  document.getElementById('s-lost').textContent  = lost;
+  document.getElementById('s-found').textContent = found;
+  const myLost  = allItems.filter(i=>i.reported_by===currentUser.id && i.type==='lost').length;
+  const myFound = allItems.filter(i=>i.reported_by===currentUser.id && i.type==='found').length;
+  const myRec   = allItems.filter(i=>i.reported_by===currentUser.id && i.status==='claimed').length;
+  document.getElementById('ps-lost').textContent  = myLost;
+  document.getElementById('ps-found').textContent = myFound;
+  document.getElementById('ps-rec').textContent   = myRec;
+}
+
+// ════════════════════════════════════════════════
+// ITEMS RENDER
+// ════════════════════════════════════════════════
+let activeFilter='all', activeSearch='';
+
+function renderItems() {
+  let filtered = allItems.filter(i => {
+    const mf = activeFilter==='all'
+      || (activeFilter==='lost'    && i.type==='lost')
+      || (activeFilter==='found'   && i.type==='found' && i.status!=='claimed')
+      || (activeFilter==='claimed' && i.status==='claimed');
+    const ms = !activeSearch
+      || i.name.toLowerCase().includes(activeSearch)
+      || (i.location||'').toLowerCase().includes(activeSearch)
+      || (i.description||'').toLowerCase().includes(activeSearch);
+    return mf && ms;
+  });
+  document.getElementById('item-count').textContent = `Showing ${filtered.length} items`;
+  const grid = document.getElementById('items-grid');
+  if (!filtered.length) { grid.innerHTML='<p style="color:var(--muted);padding:.5rem">No items found.</p>'; return; }
+
+  const EMOJI = { 'Bags & Accessories':'🎒', Electronics:'📱', 'Keys & Cards':'🔑',
+                  Clothing:'👕', 'Books & Stationery':'📚', Jewellery:'💍', Other:'📦' };
+
+  grid.innerHTML = filtered.map(i => {
+    const badgeClass = i.type==='lost'?'b-lost': i.status==='claimed'?'b-claimed':'b-found';
+    const label      = i.status==='claimed'?'Claimed': i.type;
+    const dt         = i.created_at ? new Date(i.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
+    const thumb      = i.image_path
+      ? `<img src="${API_BASE}${i.image_path}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+      : `<span class="item-thumb-emoji">${EMOJI[i.category]||'📦'}</span>`;
+    // Show reporter name for found items so your friend can see who found it
+    const reporter = i.reporter_name ? `<span style="font-size:.68rem;color:var(--mid)">By ${i.reporter_name}</span>` : '';
+
+    // Action buttons
+    let actionBtns = '';
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const isMyItem = currentUser && i.reported_by === currentUser.id;
+
+    if (i.type === 'found' && i.status !== 'claimed' && !isMyItem) {
+      actionBtns += `<button class="btn btn-green btn-sm" style="flex:1" onclick="event.stopPropagation();claimItem(${i.id})">✋ Claim</button>`;
+    }
+    if (isAdmin) {
+      actionBtns += `<button class="btn btn-red btn-sm" style="flex:1" onclick="event.stopPropagation();adminDeleteItem(${i.id},'${i.name.replace(/'/g,"\\'")}')">🗑 Remove</button>`;
+    }
+    const footerBtns = actionBtns ? `<div style="display:flex;gap:.4rem;padding:.45rem .8rem;border-top:1px solid var(--border)">${actionBtns}</div>` : '';
+
+    return `<div class="item-card" onclick="viewItem(${i.id})">
+      <div class="item-thumb">${thumb}<div class="ibadge ${badgeClass}">${label}</div></div>
+      <div class="ic-body">
+        <div class="ic-name">${i.name}</div>
+        <div class="ic-loc">📍 ${i.location}</div>
+        ${reporter}
+      </div>
+      <div class="ic-footer"><span>${dt}</span></div>
+      ${footerBtns}
+    </div>`;
+  }).join('');
+}
+
+function filterItems(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderItems();
+}
+function searchItems(q) { activeSearch = q.toLowerCase(); renderItems(); }
+
+function viewItem(id) {
+  const item = allItems.find(i=>i.id===id);
+  if (!item) return;
+  showToast(`📍 ${item.name} — ${item.location}`, 'info');
+}
+
+async function claimItem(id) {
+  const item = allItems.find(i=>i.id===id);
+  if (!item) return;
+  if (!confirm(`Claim "${item.name}"?\n\nThis marks the item as returned to its owner.`)) return;
+  try {
+    await api('PATCH', `/api/items/${id}/claim`);
+    showToast(`✅ "${item.name}" marked as claimed!`, 'success');
+    await loadAllItems();
+    updateStats(); renderDashTable(); renderItems(); renderMyReports();
+    await renderNotifs();
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+async function adminDeleteItem(id, name) {
+  if (!confirm(`⚠️ Admin Action\n\nPermanently remove "${name}" from the database?\nThis cannot be undone.`)) return;
+  try {
+    await api('DELETE', `/api/items/${id}`);
+    showToast(`🗑 "${name}" removed from database`, 'info');
+    await loadAllItems();
+    updateStats(); renderDashTable(); renderItems(); renderMyReports();
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+// ════════════════════════════════════════════════
+// DASHBOARD TABLE
+// ════════════════════════════════════════════════
+function renderDashTable() {
+  const EMOJI = { 'Bags & Accessories':'🎒', Electronics:'📱', 'Keys & Cards':'🔑',
+                  Clothing:'👕', 'Books & Stationery':'📚', Jewellery:'💍', Other:'📦' };
+  const items = allItems.slice(0,8);
+  document.getElementById('dash-table-body').innerHTML = items.map(i => {
+    const sc    = i.type==='lost'?'color:var(--red)': i.status==='claimed'?'color:var(--orange)':'color:var(--green)';
+    const label = i.status==='claimed'?'Claimed': i.type==='lost'?'Lost':'Found';
+    const dt    = i.created_at ? new Date(i.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
+    return `<tr>
+      <td>${EMOJI[i.category]||'📦'} ${i.name}</td>
+      <td style="${sc}">${label}</td>
+      <td>${(i.location||'').split(',')[0]}</td>
+      <td>${dt}</td>
+      <td><span class="ibadge ${i.type==='lost'?'b-lost':i.status==='claimed'?'b-claimed':'b-found'}" style="position:static">${label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════
+// MY REPORTS
+// ════════════════════════════════════════════════
+function renderMyReports() {
+  const EMOJI = { 'Bags & Accessories':'🎒', Electronics:'📱', 'Keys & Cards':'🔑',
+                  Clothing:'👕', 'Books & Stationery':'📚', Jewellery:'💍', Other:'📦' };
+  const items = allItems.filter(i => i.reported_by === currentUser.id);
+  const title = document.getElementById('myreports-title');
+  const body  = document.getElementById('myreports-body');
+  title.textContent = `My Reports — ${currentUser.name} (${currentUser.id})`;
+  if (!items.length) { body.innerHTML='<p style="color:var(--muted)">You have not submitted any reports yet.</p>'; return; }
+  body.innerHTML = items.map(i => {
+    const sc  = i.type==='lost'?'b-lost': i.status==='claimed'?'b-claimed':'b-found';
+    const lbl = i.status==='claimed'?'Claimed': i.type==='lost'?'Open / Searching':'Submitted';
+    const dt  = i.created_at ? new Date(i.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+    const thumb = i.image_path
+      ? `<img src="${API_BASE}${i.image_path}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+      : (EMOJI[i.category]||'📦');
+    return `<div class="mr-row">
+      <div class="mr-icon">${thumb}</div>
+      <div class="mr-info">
+        <div class="mr-name">${i.name}</div>
+        <div class="mr-meta">${i.type==='lost'?'Lost':'Found'} · ${i.location} · Reported ${dt}</div>
+      </div>
+      <span class="mr-status ibadge ${sc}" style="position:static">${lbl}</span>
+    </div>`;
+  }).join('') + `<div style="margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted)">🔔 You get notified at <b>${currentUser.email}</b> when a match is found</div>`;
+}
+
+// ════════════════════════════════════════════════
+// SUBMIT FORMS — saves to shared backend DB
+// ════════════════════════════════════════════════
+async function submitLost() {
+  const name = document.getElementById('l-name').value.trim();
+  const loc  = document.getElementById('l-loc').value.trim();
+  if (!name) { showToast('⚠️ Please enter item name'); return; }
+  if (!loc)  { showToast('⚠️ Please enter last seen location'); return; }
+
+  const imgEl  = document.getElementById('lost-preview');
+  const imgB64 = (imgEl.style.display !== 'none' && imgEl.src.startsWith('data:'))
+    ? imgEl.src.split(',')[1] : null;
+
+  showToast('Submitting lost report…', 'info');
+  try {
+    const res = await api('POST', '/api/items', {
+      type        : 'lost',
+      name,
+      category    : document.getElementById('l-cat').value || 'Other',
+      location    : loc,
+      description : document.getElementById('l-desc').value,
+      date_event  : document.getElementById('l-date').value,
+      image_base64: imgB64,
+    });
+    showToast(`Lost report saved! ${res.matches > 0 ? res.matches + ' possible match(es) found 🔔' : 'Watching for matches…'}`, 'success');
+    document.getElementById('l-name').value='';
+    document.getElementById('l-loc').value='';
+    document.getElementById('l-desc').value='';
+    document.getElementById('l-cat').value='';
+    resetUpload('lost');
+    await loadAllItems();
+    updateStats(); renderDashTable(); renderItems(); renderMyReports();
+    await renderNotifs();
+    showTab('myreports');
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+async function submitFound() {
+  const name = document.getElementById('f-name').value.trim();
+  const loc  = document.getElementById('f-loc').value.trim();
+  if (!name) { showToast('⚠️ Please enter item name'); return; }
+  if (!loc)  { showToast('⚠️ Please enter location where found'); return; }
+
+  const imgEl  = document.getElementById('found-preview');
+  const imgB64 = (imgEl.style.display !== 'none' && imgEl.src.startsWith('data:'))
+    ? imgEl.src.split(',')[1] : null;
+
+  showToast('Submitting found item…', 'info');
+  try {
+    const res = await api('POST', '/api/items', {
+      type        : 'found',
+      name,
+      category    : document.getElementById('f-cat').value || 'Other',
+      location    : loc,
+      description : document.getElementById('f-desc').value,
+      date_event  : document.getElementById('f-date').value,
+      image_base64: imgB64,
+    });
+    // If matches found, the backend already sent notification to the owner
+    showToast(`Found item saved! ${res.matches > 0 ? '🔔 Owner notified of possible match!' : 'Added to database.'}`, 'success');
+    document.getElementById('f-name').value='';
+    document.getElementById('f-loc').value='';
+    document.getElementById('f-desc').value='';
+    document.getElementById('f-cat').value='';
+    resetUpload('found');
+    await loadAllItems();
+    updateStats(); renderDashTable(); renderItems(); renderMyReports();
+    await renderNotifs();
+    showTab('myreports');
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+// ════════════════════════════════════════════════
+// NOTIFICATIONS — fetched from backend (shared)
+// ════════════════════════════════════════════════
+async function renderNotifs() {
+  try {
+    const notifs  = await api('GET', '/api/notifications');
+    const unread  = notifs.filter(n => !n.is_read).length;
+    const countEl = document.getElementById('notif-count');
+    countEl.textContent = unread;
+    countEl.style.display = unread > 0 ? 'flex' : 'none';
+
+    const iconMap = { match:'🔍', hint:'💡', info:'🔔' };
+    document.getElementById('notif-list').innerHTML = notifs.length
+      ? notifs.map(n => {
+          const dt = n.created_at ? new Date(n.created_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '';
+          return `<div class="notif-item ${n.is_read?'':'unread'} ${n.type||'info'}">
+            <div class="notif-icon">${iconMap[n.type]||'🔔'}</div>
+            <div class="notif-title">${n.title}</div>
+            <div class="notif-body">${n.body}</div>
+            <div class="notif-time">${dt}</div>
+          </div>`;
+        }).join('')
+      : '<p style="color:var(--muted);font-size:.82rem;padding:.5rem">No notifications yet.</p>';
+  } catch(e) {
+    console.warn('Notif fetch failed:', e.message);
+  }
+}
+
+function toggleNotifPanel() {
+  document.getElementById('notif-panel').classList.toggle('open');
+}
+
+async function markAllRead() {
+  try {
+    await api('PATCH', '/api/notifications/read-all');
+    await renderNotifs();
+    showToast('All notifications marked as read', 'info');
+  } catch(e) { showToast('⚠️ ' + e.message); }
+}
+
+async function clearAllNotifs() {
+  if (!confirm('Clear all notifications? This cannot be undone.')) return;
+  try {
+    await api('DELETE', '/api/notifications/clear-all');
+    await renderNotifs();
+    showToast('🗑 All notifications cleared', 'info');
+  } catch(e) { showToast('⚠️ ' + e.message); }
+}
+
+// ════════════════════════════════════════════════
+// IMAGE UPLOAD + AI DETECTION
+// ════════════════════════════════════════════════
+let foundB64=null, foundImgType=null, aiData=null;
+
+function triggerUpload(type) { document.getElementById(type+'-file').click(); }
+function handleDragOver(e,type) { e.preventDefault(); document.getElementById(type+'-upload-zone').style.borderColor='var(--mid)'; }
+function handleDrop(e,type) { e.preventDefault(); document.getElementById(type+'-upload-zone').style.borderColor=''; const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) processImg(f,type); }
+function handleFile(inp,type) { if(inp.files[0]) processImg(inp.files[0],type); }
+
+function processImg(file, type) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById(type+'-upload-zone').classList.add('has-img');
+    document.getElementById(type+'-upload-placeholder').style.display = 'none';
+    const prev = document.getElementById(type+'-preview');
+    prev.src = e.target.result; prev.style.display = 'block';
+    if (type==='found') {
+      foundB64 = e.target.result.split(',')[1];
+      foundImgType = file.type;
+      document.getElementById('ai-panel').style.display  = 'block';
+      document.getElementById('ai-loading').style.display = 'flex';
+      document.getElementById('ai-result').style.display  = 'none';
+      document.getElementById('ai-err').style.display     = 'none';
+      runAI();
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetUpload(type) {
+  document.getElementById(type+'-upload-zone').classList.remove('has-img');
+  document.getElementById(type+'-upload-placeholder').style.display = 'block';
+  const prev = document.getElementById(type+'-preview');
+  prev.src=''; prev.style.display='none';
+  document.getElementById(type+'-file').value='';
+  if (type==='found') { document.getElementById('ai-panel').style.display='none'; foundB64=null; aiData=null; }
+}
+
+async function runAI() {
+  const msgs = ['Running YOLOv8 detection…','Identifying object class…','Analyzing color & condition…','Building description…'];
+  let mi=0;
+  const msgEl = document.getElementById('ai-msg');
+  const iv = setInterval(()=>{ mi=(mi+1)%msgs.length; msgEl.textContent=msgs[mi]; }, 900);
+  try {
+    const res = await fetch(`${API_BASE}/api/detect`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image_base64: foundB64, image_type: foundImgType })
+    });
+    clearInterval(iv);
+    if (!res.ok) { const e=await res.json(); throw new Error(e.error||'Server error'); }
+    aiData = await res.json();
+    document.getElementById('ai-loading').style.display = 'none';
+    document.getElementById('ai-result').style.display  = 'block';
+    document.getElementById('ai-conf').textContent = (aiData.confidence||'—') + ' confidence';
+    document.getElementById('ai-grid').innerHTML = `
+      <div class="ai-chip"><div class="ai-cl">Item</div><div class="ai-cv">${aiData.item_name}</div></div>
+      <div class="ai-chip"><div class="ai-cl">Category</div><div class="ai-cv">${aiData.category}</div></div>
+      <div class="ai-chip"><div class="ai-cl">Color</div><div class="ai-cv">${aiData.color}</div></div>
+      <div class="ai-chip"><div class="ai-cl">Condition</div><div class="ai-cv">${aiData.condition}</div></div>`;
+    document.getElementById('ai-desc').textContent = aiData.description;
+  } catch(err) {
+    clearInterval(iv);
+    document.getElementById('ai-loading').style.display = 'none';
+    const el = document.getElementById('ai-err'); el.style.display='block';
+    el.textContent = err.message.includes('fetch')
+      ? '⚠️ Backend not running. Start it: python app.py'
+      : '⚠️ Detection failed: ' + (err.message||'Try again');
+  }
+}
+
+function applyAI() {
+  if (!aiData) return;
+  document.getElementById('f-name').value = aiData.item_name||'';
+  document.getElementById('f-desc').value = aiData.description||'';
+  const sel = document.getElementById('f-cat');
+  for (let o of sel.options) if (o.value===aiData.category) { sel.value=aiData.category; break; }
+  showToast('AI results applied!','success');
+}
+function retryAI() {
+  if (!foundB64) return;
+  document.getElementById('ai-loading').style.display='flex';
+  document.getElementById('ai-result').style.display='none';
+  document.getElementById('ai-err').style.display='none';
+  runAI();
+}
+
+// ════════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  const map={dashboard:0,browse:1,report:2,myreports:3};
+  if (map[id]!==undefined) document.querySelectorAll('.tab-btn')[map[id]].classList.add('active');
+  if (id==='browse')    renderItems();
+  if (id==='myreports') renderMyReports();
+  if (id==='dashboard') renderDashTable();
+}
+
+function sideNav(el, isLF) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  if (!isLF) showToast('This module is part of the full UPES Portal','info');
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  document.getElementById('t-msg').textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._to);
+  t._to = setTimeout(()=>t.classList.remove('show'), 3800);
+}
+</script>
+</body>
+</html>
